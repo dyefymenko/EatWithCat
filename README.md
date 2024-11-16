@@ -20,7 +20,7 @@ export NETWORK_ID="base-sepolia" # Optional, defaults to base-sepolia
 2. copy ngrok's forwarding URL, i.e. `https://abcd1234.ngrok-free.app`
 3. in terminal 2, run curl -X POST "https://api.telegram.org/bot7823163314:AAGi3LZ0zFvBvtVauTPtWbcJoLQfQrQfhH0/setWebhook" -d "url=<step 2 URL>/webhook"
 4. check that this succeeded, `curl -X POST "https://api.telegram.org/bot7823163314:AAGi3LZ0zFvBvtVauTPtWbcJoLQfQrQfhH0/getWebhookInfo"`
-5. in the response, see that the url is like   "https://abcd1234.ngrok-free.app/webhook"
-6. in commandManager.py, update WEBHOOKS_URL to be step 5 url, and REDIRECT_URI to be like "https://abcd1234.ngrok-free.app/oauth/callback"
-7. in Coinbase's developer dashboard, update the OAuth redirect URI to be like "https://abcd1234.ngrok-free.app/oauth/callback"
+5. in the response, see that the url is like   `https://abcd1234.ngrok-free.app/webhook`
+6. in commandManager.py, update WEBHOOKS_URL to be step 5 url, and REDIRECT_URI to be like `<step 2 URL>/oauth/callback`
+7. in Coinbase's developer dashboard, update the OAuth redirect URI to be like "<step 2 URL>/oauth/callback"
 8. in terminal 3, run `python commandManager.py`
