@@ -1,42 +1,65 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+body {
+  background-color: #d0e7ff;
+  font-family: 'Helvetica', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  margin: 0;
+}
+
+#app {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  width: 90%;
+}
+
+.dish-card {
+  background-color: #ffffff;
+  border: 2px solid #9ad1ff;
+  border-radius: 15px;
+  box-shadow: 0 0 15px 5px rgba(138, 180, 248, 0.3);
+  padding: 15px;
   text-align: center;
+  transition: transform 0.2s;
+  height: 200px;
+  width: 200px;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.dish-card:hover {
+  transform: scale(1.05);
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+.dish-photo {
+  width: 100%;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.restaurant-name {
+  color: #0056b3;
+  margin: 0;
+  font-size: 1.2em;
+}
+
+.dish-name {
+  color: #0066cc;
+  font-weight: bold;
+  margin: 5px 0;
+}
+
+.dish-price {
+  color: #0099ff;
+  font-size: 1.1em;
+}
+
+.dish-photo {
+  width: 100px; 
+  height: 100px; 
+  object-fit: cover;
+  object-position: 50% 50%;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
   }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
