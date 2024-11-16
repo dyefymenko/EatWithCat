@@ -11,7 +11,7 @@ body {
 
 #app {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 10px;
   width: 100%;
   padding: 10px;
@@ -37,35 +37,10 @@ body {
 }
 
 
-.restaurant-name,
-.dish-name,
-.dish-price {
-  margin: 0; /* Ensure no extra margins */
-  word-wrap: break-word;
-  text-align: center;
-}
-
-.restaurant-name {
-  color: #0056b3;
-  font-size: calc(1em + 1vw);
-}
-
-.dish-name {
-  color: #0066cc;
-  font-weight: bold;
-  margin: 5px 0;
-  font-size: calc(0.9em + 0.8vw);
-}
-
-.dish-price {
-  color: #0099ff;
-  font-size: calc(0.8em + 0.7vw);
-  margin-bottom: 5px;
-}
 
 @media (max-width: 768px) {
   #app {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 5px;
   }
 
@@ -73,9 +48,4 @@ body {
     padding: 5px;
   }
 
-  .restaurant-name,
-  .dish-name,
-  .dish-price {
-    font-size: calc(0.8em + 0.5vw);
-  }
 }
