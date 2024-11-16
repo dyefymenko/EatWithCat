@@ -10,23 +10,24 @@ body {
 
 #app {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 20px;
   width: 100%;
-  max-width: 1200px;
+  padding:10px
 }
 
 .dish-card {
   background-color: #ffffff;
-  border: 2dp solid #9ad1ff;
+  border: 2px solid #9ad1ff;
   border-radius: 10px;
   box-shadow: 0 0 15dp 5dp rgba(138, 180, 248, 0.3);
   padding: 15px;
   text-align: center;
   transition: transform 0.2s;
-  width: 200dp;
-  height: 200dp;
   margin: 7%;
+  position: relative;
+  overflow: hidden;
+ 
 }
 
 
@@ -59,8 +60,6 @@ body {
 }
 
 .dish-photo {
-  width: 100%;
-  height: auto;
   border-radius: 10px;
   margin-bottom: 10px; 
   object-fit: cover;
@@ -69,3 +68,10 @@ body {
   margin-left: auto;
   margin-right: auto;
   }
+
+  @media (max-width: 768px) {
+    #app {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* Reduces card size */
+        gap: 10px; /* Less space between cards */
+    }
+}
