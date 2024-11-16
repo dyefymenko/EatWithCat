@@ -3,14 +3,18 @@ import React from 'react';
 import './App.css';
 
 // Sample data for dishes
-const cats = ['img/taco.png', 'img/pasta.png', 'img/pizza.png', 'img/melon.png'];
-
+const cats = [
+  { name: 'taco', path: '/img/taco.png' },
+  { name: 'pasta', path: '/img/pasta.png' },
+  { name: 'pizza', path: '/img/pizza.png' },
+  { name: 'melon', path: '/img/melon.png' }
+];
 function App() {
     return (
         <div id="app">
             {cats.map((cat, index) => (
                 <div key={index} className="dish-card">
-                    <img src={cat} alt="kitty with food" />
+                    <img src={cat.path} alt="kitty with food" />
                 </div>
             ))}
         </div>
