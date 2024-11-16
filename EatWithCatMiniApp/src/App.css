@@ -4,28 +4,31 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px;
+  padding: 20dp;
   margin: 0;
 }
 
 #app {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
-  width: 90%;
+  width: 100%;
+  max-width: 1200px;
 }
 
 .dish-card {
   background-color: #ffffff;
-  border: 2px solid #9ad1ff;
-  border-radius: 15px;
-  box-shadow: 0 0 15px 5px rgba(138, 180, 248, 0.3);
+  border: 2dp solid #9ad1ff;
+  border-radius: 10px;
+  box-shadow: 0 0 15dp 5dp rgba(138, 180, 248, 0.3);
   padding: 15px;
   text-align: center;
   transition: transform 0.2s;
-  height: 200px;
-  width: 200px;
+  width: 200dp;
+  height: 200dp;
+  margin: 7%;
 }
+
 
 .dish-card:hover {
   transform: scale(1.05);
@@ -33,8 +36,9 @@ body {
 
 .dish-photo {
   width: 100%;
-  border-radius: 10px;
-  margin-bottom: 10px;
+  border-radius: 10
+  ;
+  margin-bottom: 10dp;
 }
 
 .restaurant-name {
@@ -46,7 +50,7 @@ body {
 .dish-name {
   color: #0066cc;
   font-weight: bold;
-  margin: 5px 0;
+  margin: 5dp 0;
 }
 
 .dish-price {
@@ -55,8 +59,8 @@ body {
 }
 
 .dish-photo {
-  width: 100px; 
-  height: 100px; 
+  width: 100dp; 
+  height: 100dp; 
   object-fit: cover;
   object-position: 50% 50%;
   display: block;
