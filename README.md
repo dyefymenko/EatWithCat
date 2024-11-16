@@ -16,11 +16,12 @@ export NETWORK_ID="base-sepolia" # Optional, defaults to base-sepolia
 
 
 ## How to start the Telegram bot
-1. in terminal 1, run `ngrok http <available port #>`
-2. copy ngrok's forwarding URL, i.e. `https://abcd1234.ngrok-free.app`
-3. in terminal 2, run curl -X POST "https://api.telegram.org/bot7823163314:AAGi3LZ0zFvBvtVauTPtWbcJoLQfQrQfhH0/setWebhook" -d "url=<step 2 URL>/webhook"
-4. check that this succeeded, `curl -X POST "https://api.telegram.org/bot7823163314:AAGi3LZ0zFvBvtVauTPtWbcJoLQfQrQfhH0/getWebhookInfo"`
-5. in the response, see that the url is like   `https://abcd1234.ngrok-free.app/webhook`
-6. in commandManager.py, update WEBHOOKS_URL to be step 5 url, and REDIRECT_URI to be like `<step 2 URL>/oauth/callback`
-7. in Coinbase's developer dashboard, update the OAuth redirect URI to be like "<step 2 URL>/oauth/callback"
-8. in terminal 3, run `python commandManager.py`
+1. Get an ngrok account here https://ngrok.com/
+2. in terminal 1, run `ngrok http <available port #>`
+3. copy ngrok's forwarding URL, i.e. `https://abcd1234.ngrok-free.app`
+4. in terminal 2, run curl -X POST "https://api.telegram.org/bot7823163314:AAGi3LZ0zFvBvtVauTPtWbcJoLQfQrQfhH0/setWebhook" -d "url=<step 2 URL>/webhook"
+5. check that this succeeded, `curl -X POST "https://api.telegram.org/bot7823163314:AAGi3LZ0zFvBvtVauTPtWbcJoLQfQrQfhH0/getWebhookInfo"`
+6. in the response, see that the url is like   `https://abcd1234.ngrok-free.app/webhook`
+7. in commandManager.py, update WEBHOOKS_URL to be step 5 url, and REDIRECT_URI to be like `<step 2 URL>/oauth/callback`
+8. in Coinbase's developer dashboard, update the OAuth redirect URI to be like "<step 2 URL>/oauth/callback"
+9. in terminal 3, run `python commandManager.py`
