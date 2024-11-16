@@ -100,12 +100,13 @@ def place_order(pickup_address: str, pickup_business_name: str, pickup_phone_num
     }
 
     create_delivery = requests.post(endpoint, headers=headers, json=request_body) # Create POST request
-    print(create_delivery.status_code)
-    print(create_delivery.text)
-    print(create_delivery.reason)
-
-
-    return f"Delivery ID {delivery_id} placed"
+    if create_delivery.status_code != 200:
+        print(create_delivery.status_code)
+        print(create_delivery.text)
+        print(create_delivery.reason)
+        return f"Delivery ID {delivery_id} failed"
+    else:
+        return f"Delivery ID {delivery_id} placed"
 
 # Configure a file to persist the agent's CDP MPC Wallet Data.
 wallet_data_file = "wallet_data.txt"
