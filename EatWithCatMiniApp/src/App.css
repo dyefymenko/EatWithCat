@@ -59,8 +59,10 @@ body {
 }
 
 .dish-photo {
-  width: 100dp; 
-  height: 100dp; 
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  margin-bottom: 10px; 
   object-fit: cover;
   object-position: 50% 50%;
   display: block;
