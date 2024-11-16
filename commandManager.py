@@ -7,21 +7,22 @@ import logging
 from threading import Thread
 import queue
 import uuid
+import os
 
 # Enable logging
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", 
-    level=logging.DEBUG
+    level=logging.INFO
 )
 logger = logging.getLogger(__name__)
 
 # Replace with your bot token
 BOT_TOKEN = "7823163314:AAGi3LZ0zFvBvtVauTPtWbcJoLQfQrQfhH0"
-WEBHOOK_URL = "https://b3d5-210-1-49-170.ngrok-free.app/webhook"
+WEBHOOK_URL = "https://00b0-1-47-144-80.ngrok-free.app/webhook"
 
 CLIENT_ID = "ea37fba5-f638-4308-b773-602ecfb9041e"
 CLIENT_SECRET = "kenxZP5sNE4EeYQAAxwMna8Qni"
-REDIRECT_URI = "https://b3d5-210-1-49-170.ngrok-free.app/oauth/callback"
+REDIRECT_URI = "https://00b0-1-47-144-80.ngrok-free.app/oauth/callback"
 
 # Coinbase OAuth URLs
 COINBASE_AUTH_URL = "https://www.coinbase.com/oauth/authorize"
@@ -35,16 +36,20 @@ WAITING_FOR_ADDRESS = 3
 
 # Dictionary to store user data and pending authentications
 user_data = {}
-pending_auth = {}  # Store pending authentications with state
+pending_auth = {}
 
 # Initialize Flask and Application
 app = Flask(__name__)
-application = Application.builder().token(BOT_TOKEN).build()
+application = None
+update_queue = queue.Queue()
+
+def create_application():
+    global application
+    application = Application.builder().token(BOT_TOKEN).build()
+    return application
 
 def get_wallet_connect_button(user_id):
-    # Generate a unique state parameter for this auth request
     state = str(uuid.uuid4())
-    # Store the user_id with the state
     pending_auth[state] = user_id
     
     auth_url = f"{COINBASE_AUTH_URL}?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope=wallet:user:read&state={state}"
@@ -52,7 +57,6 @@ def get_wallet_connect_button(user_id):
     return InlineKeyboardMarkup(keyboard)
 
 def send_telegram_message(chat_id, text):
-    """Synchronous function to send Telegram messages"""
     try:
         url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
         payload = {
@@ -72,19 +76,15 @@ def callback():
         code = request.args.get("code")
         state = request.args.get("state")
         
-        logger.info(f"Received callback with state: {state}")
-        
         if not code or not state:
             logger.error("Missing code or state parameter")
             return "Authorization failed: Missing parameters", 400
             
-        # Retrieve the Telegram user ID from the state
         user_id = pending_auth.get(state)
         if not user_id:
             logger.error(f"Invalid state parameter: {state}")
             return "Invalid state parameter!", 400
 
-        # Exchange the authorization code for an access token
         token_response = requests.post(
             COINBASE_TOKEN_URL,
             data={
@@ -106,7 +106,6 @@ def callback():
         if not access_token:
             return "Failed to retrieve access token!", 400
 
-        # Fetch user account data
         user_response = requests.get(
             COINBASE_ACCOUNT_URL,
             headers={"Authorization": f"Bearer {access_token}"},
@@ -117,25 +116,23 @@ def callback():
             return "Failed to fetch user data!", 400
 
         coinbase_user_data = user_response.json()
+        logger.info(f"Coinbase user data: {coinbase_user_data}")
         
-        # Initialize user data if not exists
+        # Initialize or update user data
         if user_id not in user_data:
             user_data[user_id] = {}
-
-        # Store the wallet connection status and token
+            
         user_data[user_id].update({
             'wallet_connected': True,
             'access_token': access_token,
-            'coinbase_email': coinbase_user_data.get('data', {}).get('email')
+            'coinbase_name': coinbase_user_data.get('data', {}).get('name')
         })
 
-        # Send message back to user via Telegram
         send_telegram_message(
             chat_id=user_id,
-            text=f"✅ Wallet connected successfully!\nEmail: {user_data[user_id]['coinbase_email']}\n\nWhat food are you craving right now? 😋"
+            text=f"✅ Wallet connected successfully!\nName: {user_data[user_id]['coinbase_name']}\n\nWhat food are you craving right now? 😋"
         )
 
-        # Clean up the pending authentication
         del pending_auth[state]
 
         return """
@@ -160,13 +157,10 @@ def callback():
 def favicon():
     return "", 204
 
-# Define command handler for /start
 async def start(update: Update, context) -> int:
-    logger.debug("Start command received")
     user_id = update.message.from_user.id
     username = update.message.from_user.first_name
     
-    # Check if user already has connected wallet
     if user_id in user_data and user_data[user_id].get('wallet_connected'):
         await update.message.reply_text(
             f"Welcome back {username}! I see your wallet is already connected.\n"
@@ -174,37 +168,41 @@ async def start(update: Update, context) -> int:
         )
         return WAITING_FOR_FOOD_SELECTION
     
-    # If wallet not connected, prompt for connection
     await update.message.reply_text(
-        f"Hello {username}! Welcome to Eat With Cat! 👋\n\n"
+        f"Hello {username}! Welcome to Eat With Cat! 🐱👋\n\n"
+        "Powered by AI, Cat will help you satisfy your cravings for yummy dishes without needing to browse delivery apps.\n\n"
         "Before we begin, please connect your Coinbase wallet:",
-        reply_markup=get_wallet_connect_button(user_id)  # Pass user_id
+        reply_markup=get_wallet_connect_button(user_id)
     )
     return WAITING_FOR_WALLET
 
 async def check_wallet(update: Update, context) -> int:
     user_id = update.message.from_user.id
     
+    # If wallet is connected, treat the message as food selection
     if user_id in user_data and user_data[user_id].get('wallet_connected'):
+        food = update.message.text
+        user_data[user_id]['food_choice'] = food
+        
         await update.message.reply_text(
-            "Great! Your wallet is connected. What food are you craving right now? 😋"
+            f"Wonderful choice, let's get some {food}! I've saved your selection. ✅\n\n"
+            f"Now what's your address? Cat will find the best {food} in your area! 🐈🍕"
         )
-        return WAITING_FOR_FOOD_SELECTION
-    else:
-        await update.message.reply_text(
-            "Please connect your Coinbase wallet first:",
-            reply_markup=get_wallet_connect_button(user_id)  # Pass user_id
-        )
-        return WAITING_FOR_WALLET
+        return WAITING_FOR_ADDRESS
+        
+    await update.message.reply_text(
+        "Please connect your Coinbase wallet first:",
+        reply_markup=get_wallet_connect_button(user_id)
+    )
+    return WAITING_FOR_WALLET
 
 async def collect_food(update: Update, context) -> int:
     user_id = update.message.from_user.id
     
-    # Check wallet connection first
     if not user_id in user_data or not user_data[user_id].get('wallet_connected'):
         await update.message.reply_text(
             "Please connect your Coinbase wallet first:",
-            reply_markup=get_wallet_connect_button(user_id)  # Pass user_id
+            reply_markup=get_wallet_connect_button(user_id)
         )
         return WAITING_FOR_WALLET
     
@@ -226,8 +224,8 @@ async def collect_address(update: Update, context) -> int:
     
     await update.message.reply_text(
         "Perfect! I've saved your address. ✅\n\n"
-        "Here's what I have for you:\n"
-        f"Wallet: {user_data[user_id].get('coinbase_email')}\n"
+        "Here's what I have for you:\n\n"
+        f"Wallet: {user_data[user_id].get('coinbase_name')}\n"
         f"Address: {user_data[user_id]['address']}\n"
         f"Food Preference: {user_data[user_id]['food_choice']}\n\n"
         f"Cat is looking for the best munchies around you...🐱🌮 take a look at the menu now!"
@@ -241,13 +239,15 @@ async def cancel(update: Update, context) -> int:
     )
     return ConversationHandler.END
 
-# Flask route to handle webhook
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    logger.debug("Webhook endpoint hit")
+    if not application:
+        logger.error("Application not initialized")
+        return "Application not initialized", 500
+        
     try:
         json_data = request.get_json()
-        logger.info(f"Received update: {json_data}")
+        logger.info(f"Received webhook data: {json_data}")
         update_queue.put(json_data)
         return "OK", 200
     except Exception as e:
@@ -255,11 +255,20 @@ def webhook():
         return "Error processing update", 500
 
 def run_flask():
-    app.run(host="0.0.0.0", port=5001, debug=False, use_reloader=False)
+    try:
+        logger.info("Starting Flask server...")
+        app.run(host="0.0.0.0", port=5001, debug=False, use_reloader=False)
+    except Exception as e:
+        logger.error(f"Error running Flask: {e}", exc_info=True)
 
 async def process_updates():
     while True:
         try:
+            if not application:
+                logger.error("Application not initialized")
+                await asyncio.sleep(1)
+                continue
+                
             while not update_queue.empty():
                 json_data = update_queue.get()
                 update = Update.de_json(json_data, application.bot)
@@ -269,23 +278,26 @@ async def process_updates():
         except Exception as e:
             logger.error(f"Error processing update: {e}", exc_info=True)
 
-async def setup_webhook():
-    await application.initialize()
-    await application.start()
+async def setup_application():
+    global application
     
-    await application.bot.delete_webhook()
-    success = await application.bot.set_webhook(url=WEBHOOK_URL)
-    if success:
-        logger.info(f"Webhook successfully set to {WEBHOOK_URL}")
-    else:
-        logger.error("Failed to set webhook")
-    
-    webhook_info = await application.bot.get_webhook_info()
-    logger.info(f"Webhook info: {webhook_info}")
-
-async def main():
     try:
-        # Update conversation handler with new wallet state
+        # Create and initialize application
+        application = create_application()
+        await application.initialize()
+        await application.start()
+        
+        # Delete existing webhook and set new one
+        await application.bot.delete_webhook()
+        success = await application.bot.set_webhook(url=WEBHOOK_URL)
+        
+        if success:
+            logger.info(f"Webhook successfully set to {WEBHOOK_URL}")
+        else:
+            logger.error("Failed to set webhook")
+            return False
+            
+        # Add conversation handler
         conv_handler = ConversationHandler(
             entry_points=[CommandHandler('start', start)],
             states={
@@ -306,24 +318,42 @@ async def main():
         
         application.add_handler(conv_handler)
         
-        # Set up the webhook
-        await setup_webhook()
+        webhook_info = await application.bot.get_webhook_info()
+        logger.info(f"Webhook info: {webhook_info}")
         
+        return True
+    except Exception as e:
+        logger.error(f"Error setting up application: {e}", exc_info=True)
+        return False
+
+async def main():
+    try:
+        # Setup application first
+        setup_success = await setup_application()
+        if not setup_success:
+            logger.error("Failed to set up application")
+            return
+
         # Start Flask in a separate thread
         flask_thread = Thread(target=run_flask)
         flask_thread.daemon = True
         flask_thread.start()
-        
+        logger.info("Flask thread started")
+
         # Start processing updates
+        logger.info("Starting update processing")
         await process_updates()
-            
     except Exception as e:
         logger.error(f"Error in main: {e}", exc_info=True)
     finally:
-        await application.stop()
-
-# Create update queue
-update_queue = queue.Queue()
+        if application:
+            await application.stop()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        logger.info("Starting application...")
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        logger.info("Application stopped by user")
+    except Exception as e:
+        logger.error(f"Application crashed: {e}", exc_info=True)
