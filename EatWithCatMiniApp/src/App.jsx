@@ -20,9 +20,6 @@ function App() {
         <div id="app">
             {menuData.map((dish, index) => (
                 <div key={index} className="dish-card">
-                    <div className='dish-photo'>
-                      <img src={dish.photo} alt={dish.dishName} className="dish-photo" height={100} width={100} hor/>
-                    </div>
                     <div className="dish-details">
                         <h3 className="restaurant-name">{dish.restaurant}</h3>
                         <p className="dish-name">{dish.dishName}</p>
