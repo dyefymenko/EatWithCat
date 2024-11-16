@@ -142,7 +142,7 @@ def initialize_agent():
 
     # Define a new tool for signing messages.
     placeOrderTool = CdpTool(
-    name="sign_message",
+    name="place_order",
     description=PLACE_ORDER_PROMPT,
     cdp_agentkit_wrapper=agentkit,
     args_schema=PlaceOrderInput,
