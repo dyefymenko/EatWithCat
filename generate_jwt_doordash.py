@@ -18,7 +18,7 @@ token = jwt.encode(
         "aud": "doordash",
         "iss": developer_id,
         "kid": key_id,
-        "exp": str(math.floor(time.time() + 300)),
+        "exp": str(math.floor(time.time() + 600)),
         "iat": str(math.floor(time.time())),
     },
     jwt.utils.base64url_decode(signing_secret),

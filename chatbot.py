@@ -16,6 +16,7 @@ from pydantic import BaseModel, Field
 import requests
 from dotenv import load_dotenv
 from cdp_langchain.tools import CdpTool
+import random
 
 # Load the .env file
 load_dotenv()
@@ -76,7 +77,8 @@ def place_order(pickup_address: str, pickup_business_name: str, pickup_phone_num
 
     """
     #tx = wallet.transfer(hash_message(message)).wait()
-    delivery_id = "D-12345"
+    random_number = random.randint(1, 100000)
+    delivery_id = "D-" + str(random_number)
 
     endpoint = "https://openapi.doordash.com/drive/v2/deliveries/"
 
@@ -98,6 +100,9 @@ def place_order(pickup_address: str, pickup_business_name: str, pickup_phone_num
     }
 
     create_delivery = requests.post(endpoint, headers=headers, json=request_body) # Create POST request
+    print(create_delivery.status_code)
+    print(create_delivery.text)
+    print(create_delivery.reason)
 
 
     return f"Delivery ID {delivery_id} placed"
@@ -154,7 +159,7 @@ def initialize_agent():
         llm,
         tools=tools,
         checkpointer=memory,
-        state_modifier="You are a helpful agent that can interact onchain using the Coinbase Developer Platform Agentkit. You are empowered to interact onchain using your tools. If you ever need funds, you can request them from the faucet if you are on network ID `base-sepolia`. If not, you can provide your wallet details and request funds from the user. If someone asks you to do something you can't do with your currently available tools, you must say so, and encourage them to implement it themselves using the CDP SDK + Agentkit, recommend they go to docs.cdp.coinbase.com for more informaton. Be concise and helpful with your responses. Refrain from restating your tools' descriptions unless it is explicitly requested. You can also place a delivery order using the `place_order` tool. When helping the user determine what restaurant to eat at, please provide the restaraunt's name, address, phone number, pickup instructions, food item, and price of food item.",
+        state_modifier="You are a helpful agent that can interact onchain using the Coinbase Developer Platform Agentkit. You are empowered to interact onchain using your tools. If you ever need funds, you can request them from the faucet if you are on network ID `base-sepolia`. If not, you can provide your wallet details and request funds from the user. If someone asks you to do something you can't do with your currently available tools, you must say so, and encourage them to implement it themselves using the CDP SDK + Agentkit, recommend they go to docs.cdp.coinbase.com for more informaton. Be concise and helpful with your responses. Refrain from restating your tools' descriptions unless it is explicitly requested. You can also place a delivery order using the `place_order` tool. When helping the user determine what restaurant to eat at, please provide the restaraunt's name, address, phone number in the format +16505555555, pickup instructions, food item, and delivery cost of a food item.",
     ), config
 
 
