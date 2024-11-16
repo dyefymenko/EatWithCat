@@ -1,6 +1,6 @@
 from flask import Flask, request
 from telegram import Update
-from telegram.ext import Application, CommandHandler, MessageHandler, filters
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, ConversationHandler
 import asyncio
 import logging
 from threading import Thread
@@ -17,6 +17,13 @@ logger = logging.getLogger(__name__)
 BOT_TOKEN = "7823163314:AAGi3LZ0zFvBvtVauTPtWbcJoLQfQrQfhH0"
 WEBHOOK_URL = "https://292c-210-1-49-170.ngrok-free.app/webhook"
 
+# Define conversation states
+WAITING_FOR_ADDRESS = 1
+WAITING_FOR_FOOD_SELECTION = 2
+
+# Dictionary to store user data
+user_data = {}
+
 # Initialize Flask and Application
 app = Flask(__name__)
 application = Application.builder().token(BOT_TOKEN).build()
@@ -25,19 +32,64 @@ application = Application.builder().token(BOT_TOKEN).build()
 update_queue = queue.Queue()
 
 # Define command handler for /start
-async def start(update: Update, context) -> None:
-    # logger.debug("Start command received")
-    await update.message.reply_text("Welcome to Eat With Cat!\n\nPowered by AI, Cat wil help you satisfy your cravings for yummy dishes without needing to browse delivery apps. Let Cat know what food you're craving right now!")
+async def start(update: Update, context) -> int:
+    logger.debug("Start command received")
+    username = update.message.from_user.first_name
+    
+    await update.message.reply_text(
+        f"{username}, Welcome to Eat With Cat! 👋\n\n"
+        "Powered by AI, Cat will help you satisfy your cravings for yummy dishes without needing to browse delivery apps.\n\nLet Cat know what food you're craving right now!"
+    )
+    return WAITING_FOR_FOOD_SELECTION
 
-# Define message handler for text messages
-async def handle_message(update: Update, context) -> None:
-    logger.debug("Message handler triggered")
-    user_message = update.message.text
-    chat_id = update.message.chat_id
-    username = update.message.from_user.username
+async def collect_food(update: Update, context) -> int:
+    user_id = update.message.from_user.id
+    food = update.message.text
+    
+    # Initialize user data if not exists
+    if user_id not in user_data:
+        user_data[user_id] = {}
+    
+    # Update the existing dictionary instead of creating a new one
+    user_data[user_id]['food_choice'] = food
+    
+    await update.message.reply_text(
+        f"Wonderful choice, let's get some {food}! I've saved your selection. ✅\n\n"
+        f"Now what's your address? Cat will find the best {food} in your area! "
+    )
+    
+    logger.info(f"Current user_data: {user_data}")
+    
+    return WAITING_FOR_ADDRESS
 
-    logger.info(f"Received message from {username} (chat ID {chat_id}): {user_message}")
-    await update.message.reply_text("Thank you for your message!")
+async def collect_address(update: Update, context) -> int:
+    user_id = update.message.from_user.id
+    address = update.message.text
+    
+    # Initialize user data if not exists
+    if user_id not in user_data:
+        user_data[user_id] = {}
+    
+    # Update the existing dictionary instead of overwriting it
+    user_data[user_id]['address'] = address
+    
+    await update.message.reply_text(
+        "Perfect! I've saved your address. ✅\n\n"
+        "Here's what I have for you:\n"
+        f"Address: {user_data[user_id]['address']}\n"
+        f"Food Preference: {user_data[user_id]['food_choice']}\n\n"
+        f"Cat is looking for the best munchies around you...🐱🌮 take a look at the menu now! "
+    )
+    
+    logger.info(f"Current user_data: {user_data}")
+    
+    return ConversationHandler.END
+
+async def cancel(update: Update, context) -> int:
+    await update.message.reply_text(
+        "Operation cancelled. You can start again with /start command."
+    )
+    return ConversationHandler.END
 
 # Flask route to handle webhook
 @app.route("/webhook", methods=["POST"])
@@ -63,7 +115,7 @@ async def process_updates():
                 update = Update.de_json(json_data, application.bot)
                 await application.process_update(update)
                 update_queue.task_done()
-            await asyncio.sleep(0.1)  # Small delay to prevent CPU overuse
+            await asyncio.sleep(0.1)
         except Exception as e:
             logger.error(f"Error processing update: {e}", exc_info=True)
 
@@ -87,9 +139,24 @@ async def setup_webhook():
 
 async def main():
     try:
-        # Register handlers
-        application.add_handler(CommandHandler("start", start))
-        application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+        # conversation handler
+        conv_handler = ConversationHandler(
+            entry_points=[CommandHandler('start', start)],
+            states={
+                WAITING_FOR_FOOD_SELECTION: [
+                    MessageHandler(filters.TEXT & ~filters.COMMAND, collect_food)
+                ],
+                WAITING_FOR_ADDRESS: [
+                    MessageHandler(filters.TEXT & ~filters.COMMAND, collect_address)
+                ],
+            },
+            fallbacks=[CommandHandler('cancel', cancel)],
+            name="food_choice_conversation",
+            persistent=False
+        )
+        
+        # Add conversation handler
+        application.add_handler(conv_handler)
         
         # Set up the webhook
         await setup_webhook()
