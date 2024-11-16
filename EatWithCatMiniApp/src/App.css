@@ -23,19 +23,21 @@ body {
   border-radius: 10px;
   box-shadow: 0 0 15px 5px rgba(138, 180, 248, 0.3);
   padding: 10px;
-  text-align: start center;
+  text-align: center;
   
   transition: transform 0.2s;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
 }
 
 .dish-card:hover {
   transform: scale(1.05);
 }
 
+.dish-card img {
+  width: 100%; /* Make the image fill the card width */
+  height: auto; /* Maintain the aspect ratio */
+  object-fit: cover; /* Ensure images fit well within the container */
+  border-radius: 8px; /* Optional: Match the card's rounded corners */
+}
 
 
 @media (max-width: 768px) {
