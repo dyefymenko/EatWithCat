@@ -10,7 +10,7 @@ function App() {
         <div id="app">
             {cats.map((cat, index) => (
                 <div key={index} className="dish-card">
-                    <img src={cat} alt="kitty with food" />
+                    <img src={cat} alt={"kitty with food ${cat}"} />
                 </div>
             ))}
         </div>
