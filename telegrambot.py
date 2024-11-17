@@ -18,11 +18,11 @@ logger = logging.getLogger(__name__)
 
 # Replace with your bot token
 BOT_TOKEN = "7823163314:AAGi3LZ0zFvBvtVauTPtWbcJoLQfQrQfhH0"
-WEBHOOK_URL = "https://81a8-184-22-105-62.ngrok-free.app/webhook"
+WEBHOOK_URL = "https://37d6-184-22-105-62.ngrok-free.app/webhook"
 
 CLIENT_ID = "ea37fba5-f638-4308-b773-602ecfb9041e"
 CLIENT_SECRET = "kenxZP5sNE4EeYQAAxwMna8Qni"
-REDIRECT_URI = "https://81a8-184-22-105-62.ngrok-free.app/oauth/callback"
+REDIRECT_URI = "https://37d6-184-22-105-62.ngrok-free.app/oauth/callback"
 
 # Coinbase OAuth URLs
 COINBASE_AUTH_URL = "https://www.coinbase.com/oauth/authorize"

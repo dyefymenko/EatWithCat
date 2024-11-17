@@ -18,6 +18,7 @@ from dotenv import load_dotenv
 from cdp_langchain.tools import CdpTool
 import random
 import logging
+from cdp import Wallet
 
 # Enable logging
 logging.basicConfig(
@@ -82,7 +83,7 @@ class PlaceOrderInput(BaseModel):
         description="The cost of the delivery e.g. `$12`"
     )
 
-def place_order(pickup_address: str, pickup_business_name: str, pickup_phone_number: str, 
+def place_order(wallet: Wallet, pickup_address: str, pickup_business_name: str, pickup_phone_number: str, 
                 pickup_instructions: str, dropoff_address: str, dropoff_business_name: str, 
                 dropoff_phone_number: str, dropoff_instructions: str, delivery_cost: str) -> str:
     """Place a delivery order given details about the pickup and dropoff."""
@@ -116,6 +117,7 @@ def place_order(pickup_address: str, pickup_business_name: str, pickup_phone_num
         return f"Delivery ID {delivery_id} failed"
     else:
         print("\nDelivery created successfully!\n")
+        result = wallet.transfer(0.001, "eth", "0x644b9c1cBf6bC12c3E0E587df2ABE4BBCed44335")
         return f"Delivery ID {delivery_id} placed"
 
 def initialize_agent():
