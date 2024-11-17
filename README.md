@@ -22,6 +22,6 @@ export NETWORK_ID="base-sepolia" # Optional, defaults to base-sepolia
 4. in terminal 2, run curl -X POST "https://api.telegram.org/bot7823163314:AAGi3LZ0zFvBvtVauTPtWbcJoLQfQrQfhH0/setWebhook" -d "url=<step 2 URL>/webhook"
 5. check that this succeeded, `curl -X POST "https://api.telegram.org/bot7823163314:AAGi3LZ0zFvBvtVauTPtWbcJoLQfQrQfhH0/getWebhookInfo"`
 6. in the response, see that the url is like   `https://abcd1234.ngrok-free.app/webhook`
-7. in commandManager.py, update WEBHOOKS_URL to be step 5 url, and REDIRECT_URI to be like `<step 2 URL>/oauth/callback`
+7. in telegrambot.py, update WEBHOOKS_URL to be step 5 url, and REDIRECT_URI to be like `<step 2 URL>/oauth/callback`
 8. in Coinbase's developer dashboard, update the OAuth redirect URI to be like "<step 2 URL>/oauth/callback"
-9. in terminal 3, run `python commandManager.py`
+9. in terminal 3, run `python telegrambot.py`
